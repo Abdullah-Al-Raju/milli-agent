@@ -7,5 +7,7 @@ transient_*.png
 __pycache__/
 models/
 *.txt
+!llms.txt
 flappy_benchmark_results.json
+
 

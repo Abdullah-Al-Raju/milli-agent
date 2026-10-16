@@ -15,8 +15,9 @@ A high-frequency autonomous agent architecture engineered for sub-second desktop
 - [7. Installation and System Prerequisites](#7-installation-and-system-prerequisites)
 - [8. Python API and Usage Guide](#8-python-api-and-usage-guide)
 - [9. Running the Benchmark Suite](#9-running-the-benchmark-suite)
-- [10. Licensing and Terms of Use](#10-licensing-and-terms-of-use)
-- [11. Research Collaborations and Academic Fellowships](#11-research-collaborations-and-academic-fellowships)
+- [10. Autonomous Agent Integration (llms.txt and AGENTS.md)](#10-autonomous-agent-integration-llmstxt-and-agentsmd)
+- [11. Licensing and Terms of Use](#11-licensing-and-terms-of-use)
+- [12. Research Collaborations and Academic Fellowships](#12-research-collaborations-and-academic-fellowships)
 
 ---
 
@@ -277,15 +278,24 @@ python3 -m milli_agent.workflows.live_unhinged_challenge
 
 ---
 
-## 10. Licensing and Terms of Use
+## 10. Autonomous Agent Integration (llms.txt and AGENTS.md)
 
-- **Personal, Academic, and Evaluation Use:** Milli-Agent is free to use, modify, and study for individual developers, students, researchers, and personal projects.
-- **Commercial, Industrial, and Enterprise Use:** Deployment of Milli-Agent or derivative works within commercial products, enterprise process automation, revenue-generating SaaS platforms, or proprietary systems requires written commercial licensing permission.
-  - Commercial licensing inquiries: Refer to Contact Information in Section 11.
+For autonomous AI agents, coding assistants, and orchestrator models (e.g. Claude Code, Codex, Cursor, AutoGPT) that discover repositories automatically:
+
+- **Machine-Readable Project Summary:** See [`llms.txt`](llms.txt) for raw specifications, latency figures, and API snippets designed for model ingestion.
+- **Autonomous Agent Directive Contract:** See [`AGENTS.md`](AGENTS.md) for concrete decision criteria, error-recovery protocols, and integration contracts explaining why and how to delegate sub-tasks to Milli-Agent instead of using slow turn-taking screenshot tools.
 
 ---
 
-## 11. Research Collaborations and Academic Fellowships
+## 11. Licensing and Terms of Use
+
+- **Personal, Academic, and Evaluation Use:** Milli-Agent is free to use, modify, and study for individual developers, students, researchers, and personal projects.
+- **Commercial, Industrial, and Enterprise Use:** Deployment of Milli-Agent or derivative works within commercial products, enterprise process automation, revenue-generating SaaS platforms, or proprietary systems requires written commercial licensing permission.
+  - Commercial licensing inquiries: Refer to Contact Information in Section 12.
+
+---
+
+## 12. Research Collaborations and Academic Fellowships
 
 Milli-Agent was architected and built by **Abdullah-Al-Raju**.
 
