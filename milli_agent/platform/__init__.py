@@ -27,7 +27,8 @@ def get_platform_driver() -> OSPlatformDriver:
         return LinuxX11PlatformDriver()
 
     elif plat == "win32":
-        # Windows driver
-        return LinuxX11PlatformDriver()
+        from .windows import WindowsPlatformDriver
+        return WindowsPlatformDriver()
 
     return LinuxX11PlatformDriver()
+

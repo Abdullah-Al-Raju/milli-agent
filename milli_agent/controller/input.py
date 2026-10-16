@@ -4,6 +4,7 @@ Backed by the native OSPlatformDriver with verified window targeting,
 closed-loop visual verification, and sub-pixel continuous splines.
 """
 
+import sys
 import time
 from typing import List, Tuple, Optional, Dict, Any
 from ..platform import get_platform_driver, OSPlatformDriver, WindowInfo
@@ -12,7 +13,7 @@ from .native_x11 import NativeX11InputController
 
 class OSInputController:
     """
-    Direct OS input executor using native platform drivers and C-level X11 calls.
+    Direct OS input executor using native platform drivers and C-level X11/Win32 calls.
     Achieves microsecond control speeds (0.013ms) without subprocess overhead.
     """
 
@@ -21,6 +22,13 @@ class OSInputController:
         self.driver = driver or get_platform_driver()
         self.active_target_window: Optional[WindowInfo] = None
         self.native_x11 = NativeX11InputController()
+        self.native_win32 = None
+        if sys.platform == "win32":
+            try:
+                from .native_win32 import NativeWin32InputController
+                self.native_win32 = NativeWin32InputController()
+            except Exception:
+                pass
 
     def bind_target_window(self, window: WindowInfo):
         """Binds the input controller to a specific target window."""
@@ -39,9 +47,13 @@ class OSInputController:
         """Moves cursor to sub-pixel coordinate in ~0.013ms."""
         if self.dry_run:
             return
+        if self.native_win32:
+            self.native_win32.move_to(int(round(x)), int(round(y)))
+            return
         if self.native_x11.is_available():
             self.native_x11.move_to(x, y)
             return
+
 
         wid = self.active_target_window.id if self.active_target_window else None
         if wid:
@@ -52,6 +64,9 @@ class OSInputController:
     def click(self, x: float, y: float, button: int = 1, window_id: Optional[int] = None) -> bool:
         """Clicks at (x, y) with microsecond latency."""
         if self.dry_run:
+            return True
+        if self.native_win32:
+            self.native_win32.click(int(round(x)), int(round(y)), button=button)
             return True
         if self.native_x11.is_available():
             self.native_x11.click(x, y, button=button)
@@ -68,6 +83,13 @@ class OSInputController:
         """Executes a smooth continuous spline stroke at high frequency."""
         if not points or self.dry_run:
             return
+        if self.native_win32:
+            x0, y0 = points[0]
+            self.native_win32.move_to(int(x0), int(y0))
+            for pt in points[1:]:
+                self.native_win32.move_to(int(pt[0]), int(pt[1]))
+                time.sleep(delay_ms / 1000.0)
+            return
         import subprocess
         x0, y0 = points[0]
         subprocess.run(["xdotool", "mousemove", str(int(x0)), str(int(y0)), "mousedown", "1"], check=False)
@@ -83,6 +105,12 @@ class OSInputController:
         wid = window_id or (self.active_target_window.id if self.active_target_window else None)
         if wid:
             self.ensure_focus(wid)
+        if self.native_win32:
+            for ch in text:
+                self.native_win32.type_char(ch)
+                if delay_ms > 0:
+                    time.sleep(delay_ms / 1000.0)
+            return
         if self.native_x11.is_available():
             self.native_x11.type_text(text, delay_ms=delay_ms)
             return
@@ -98,6 +126,10 @@ class OSInputController:
         wid = window_id or (self.active_target_window.id if self.active_target_window else None)
         if wid:
             self.ensure_focus(wid)
+
+        if self.native_win32:
+            self.native_win32.press_key(key)
+            return True
 
         if self.native_x11.is_available():
             self.native_x11.press_key(key)
@@ -118,6 +150,9 @@ class OSInputController:
         wid = window_id or (self.active_target_window.id if self.active_target_window else None)
         if wid:
             self.ensure_focus(wid)
+        if self.native_win32:
+            self.native_win32.scroll(clicks=clicks, direction=direction)
+            return
         if self.native_x11.is_available():
             self.native_x11.scroll(clicks=clicks, direction=direction, delay_ms=delay_ms)
             return
@@ -126,6 +161,7 @@ class OSInputController:
         for _ in range(clicks):
             subprocess.run(["xdotool", "click", btn], check=False)
             time.sleep(delay_ms / 1000.0)
+
 
     def pipeline_navigate_url(self, url: str, browser_window_id: Optional[int] = None) -> bool:
         """

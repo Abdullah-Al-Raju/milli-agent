@@ -34,6 +34,11 @@ class OSPlatformDriver(ABC):
         pass
 
     @abstractmethod
+    def get_screen_resolution(self) -> Tuple[int, int]:
+        """Returns desktop display resolution as (width, height)."""
+        pass
+
+    @abstractmethod
     def list_windows(self) -> List[WindowInfo]:
         """Lists all visible top-level windows currently managed by the desktop."""
         pass

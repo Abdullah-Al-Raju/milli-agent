@@ -23,6 +23,21 @@ class LinuxX11PlatformDriver(OSPlatformDriver):
     def get_platform_name(self) -> str:
         return "linux_x11"
 
+    def get_screen_resolution(self) -> Tuple[int, int]:
+        """Returns desktop display resolution as (width, height) via xwininfo."""
+        try:
+            out = subprocess.check_output(
+                ["xwininfo", "-root"],
+                stderr=subprocess.DEVNULL
+            ).decode()
+            w_match = re.search(r"Width:\s+(\d+)", out)
+            h_match = re.search(r"Height:\s+(\d+)", out)
+            if w_match and h_match:
+                return int(w_match.group(1)), int(h_match.group(1))
+        except Exception:
+            pass
+        return 1920, 1080
+
     def _parse_geometry(self, window_id: int) -> Tuple[int, int, int, int]:
         """Extracts (x, y, width, height) from xwininfo."""
         try:

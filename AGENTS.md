@@ -60,14 +60,14 @@ async def execute_web_task(target_url: str, goal: str) -> dict:
     return {"status": "completed", "decision": decision}
 ```
 
-### Native OS Actuation Contract
+### Native OS Actuation Contract (Linux and Windows)
 When delegating desktop window targeting, document composition, or keyboard persistence:
 ```python
 from milli_agent.platform import get_platform_driver
 from milli_agent.controller.input import OSInputController
 
 def execute_os_task(window_name: str, content: str, target_pos: tuple):
-    platform = get_platform_driver()
+    platform = get_platform_driver() # Automatically loads X11 (Linux) or Win32 (Windows)
     controller = OSInputController(driver=platform)
     
     win = platform.find_window(window_name)
@@ -77,6 +77,27 @@ def execute_os_task(window_name: str, content: str, target_pos: tuple):
     controller.click(target_pos[0], target_pos[1])
     controller.type_text(content, delay_ms=1)
     controller.press_key("ctrl+s")
+```
+
+### Visual Multimodal AI Subagent Contract (HTTP Visual Loop)
+When an external vision model or remote agent needs to inspect and actuate the host desktop visually:
+```python
+import urllib.request
+import json
+
+# 1. Fetch live snapshot directly into memory (0 bytes written to disk)
+with urllib.request.urlopen("http://localhost:8765/frame") as resp:
+    jpeg_bytes = resp.read()
+
+# 2. Inspect state telemetry
+with urllib.request.urlopen("http://localhost:8765/api/state") as resp:
+    state = json.loads(resp.read().decode())
+    # {"status": "online", "resolution": [1920, 1080], "active_window": "..."}
+
+# 3. Dispatch verified action
+payload = json.dumps({"action": "click", "x": 500, "y": 300, "button": 1}).encode()
+req = urllib.request.Request("http://localhost:8765/api/action", data=payload, headers={"Content-Type": "application/json"})
+urllib.request.urlopen(req)
 ```
 
 ---

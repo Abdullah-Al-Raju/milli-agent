@@ -165,13 +165,19 @@ Audited execution breakdown of an end-to-end multi-application workflow (System 
 
 ## 7. Installation and System Prerequisites
 
+### Supported Platforms
+- **Linux:** Ubuntu 20.04+, Debian, Fedora, Arch (X11 Display server or Xwayland).
+- **Windows:** Windows 10, Windows 11, Windows Server (Native Win32 C bindings via `user32.dll` and `kernel32.dll` using Python's standard `ctypes` library, zero external compiled dependencies).
+
 ### Prerequisites
-- **Operating System:** Linux (Ubuntu 20.04, 22.04, 24.04 or Debian-equivalent with X11 Display server)
-- **Python:** Version 3.10 or higher
-- **System Libraries:** `libx11-dev`, `libxtst-dev`, `xdotool`, `ffmpeg`
-- **Browser:** Chromium or Brave Browser binary located in standard PATH
+- **Python:** Version 3.10 or higher.
+- **Linux System Packages:** `libx11-dev`, `libxtst-dev`, `xdotool`, `ffmpeg`.
+- **Windows System Packages:** `ffmpeg` (accessible via PATH for live GDI capture).
+- **Browser:** Chromium, Google Chrome, or Brave Browser binary located in standard system PATH.
 
 ### System Packages Installation
+
+#### On Linux (Ubuntu / Debian):
 ```bash
 sudo apt-get update && sudo apt-get install -y \
     build-essential \
@@ -180,6 +186,12 @@ sudo apt-get update && sudo apt-get install -y \
     xdotool \
     ffmpeg \
     brave-browser
+```
+
+#### On Windows:
+```powershell
+# Install ffmpeg via winget or chocolatey
+winget install Gyan.FFmpeg
 ```
 
 ### Repository Setup
@@ -248,12 +260,25 @@ print(decision)
 # Output: {'operation': 'TYPE', 'selector': '#search-field', 'target_pos': (140, 60), 'confidence': 0.99, 'latency_ms': 0.042}
 ```
 
+### Visual HUD & AI Multimodal Server
+Launch the real-time visual streaming interface serving human operators and external multimodal AI agents:
+```bash
+milli-agent visual --port 8765 --fps 60
+```
+
+Available visual endpoints (operating in transient RAM with 0 bytes saved to disk):
+- **Live Visual Dashboard (Human HUD):** `http://localhost:8765/` (interactive Dark-Mode telemetry canvas, coordinate inspector, command bar).
+- **Live Video Stream (MJPEG 60 FPS):** `http://localhost:8765/stream` (continuous visual stream for low-latency observers).
+- **Raw Frame Snapshot (AI Vision Models):** `http://localhost:8765/frame` (instantaneous uncompressed frame snapshot for vision-language models).
+- **JSON Telemetry State:** `http://localhost:8765/api/state` (window resolution, active window title, effective FPS, uptime).
+- **Action Execution Endpoint:** `POST http://localhost:8765/api/action` (accepts sub-millisecond click, move, type, press_key, scroll, and evaluate commands).
+
 ---
 
 ## 9. Running the Benchmark Suite
 
 ### Unit and Integration Tests
-Execute all 29 automated tests verifying browser in-loop operations, decision bridging, native actuation, and perception streams:
+Execute all 34 automated tests across Linux and Windows platform drivers, browser in-loop operations, decision bridging, native actuation, and visual servers:
 ```bash
 python3 -m unittest discover tests
 ```

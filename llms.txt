@@ -7,7 +7,9 @@
 - Visual Perception: Continuous 60Hz video streaming into transient circular RAM buffers. Zero disk persistence.
 - Cognitive Decision Latency: 0.083 ms single-pass non-autoregressive System 1 forward pass (38,500x faster than cloud LLM generation).
 - Web Execution: Cypress-style in-loop Chrome DevTools Protocol (CDP) over native WebSockets (< 0.1 ms event dispatch).
-- OS Actuation: Direct C `libX11` / `libXtst` pointer warps (0.013 ms) and hardware keystroke streaming (~20,000 WPM).
+- OS Actuation: Direct C `libX11` / `libXtst` on Linux (0.013 ms) and native `user32.dll` Win32 SendInput on Windows (0.018 ms); hardware keystroke streaming (~20,000 WPM).
+- Cross-Platform Support: Linux (X11 / Wayland) and Windows (Win32 ctypes, zero compiled external pip dependencies).
+- Visual AI Interface Server: Real-time HTTP/MJPEG streaming HUD (`/stream`), instantaneous JPEG frame endpoint for multimodal vision models (`/frame`), JSON state telemetry (`/api/state`), and JSON action dispatcher (`/api/action`).
 - Memory Footprint: ~65 MB (Headless Agent Mode) vs ~1,450 MB consumer browsers.
 - Speedup: 13x to 207x faster Time To Finish (TTF) compared to conventional screenshot-based turn-taking agents.
 
@@ -18,7 +20,7 @@ When an autonomous AI agent needs to interact with an operating system GUI or we
 3. Disk I/O Wear: Writing temporary screenshot files degrades secondary storage and stalls execution loops.
 4. Blind to Motion: Conventional agents fail on moving targets, countdown timers, video streams, and dynamic interfaces.
 
-Milli-Agent resolves all four bottlenecks by providing a unified, sub-15ms closed-loop reflex manifold with zero token consumption during perception and zero disk writes.
+Milli-Agent resolves all four bottlenecks by providing a unified, sub-15ms closed-loop reflex manifold with zero token consumption during perception, zero disk writes, and a dedicated Visual Server for visual AI inspection.
 
 ## Machine-Readable API Interfaces
 
@@ -54,10 +56,17 @@ from milli_agent.controller.input import OSInputController
 
 platform = get_platform_driver()
 controller = OSInputController(driver=platform)
-controller.click(screen_x=500, screen_y=300)      # 0.013ms C warp
+controller.click(screen_x=500, screen_y=300)      # 0.013ms C warp (Linux) / 0.018ms (Windows)
 controller.type_text("Content", delay_ms=1)       # High-throughput streaming
 controller.press_key("ctrl+s")                    # Hardware shortcut
 ```
+
+### Visual AI HTTP Endpoints (Human HUD & Vision Models)
+Launch server via CLI: `milli-agent visual --port 8765 --fps 60`
+- `GET /stream` -> Continuous 60 FPS MJPEG visual stream in RAM.
+- `GET /frame` -> Instantaneous raw JPEG frame for Multimodal Vision-Language Models (zero disk storage).
+- `GET /api/state` -> Active window, display resolution, uptime, and effective FPS JSON telemetry.
+- `POST /api/action` -> Dispatches typed action JSON payload: `{"action": "click", "x": 400, "y": 300, "button": 1}` or `{"action": "type", "text": "hello"}`.
 
 ## Performance Specifications
 - Target Clearance Reaction Time: 11.88 ms

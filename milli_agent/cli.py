@@ -126,5 +126,24 @@ def benchmark(video: str):
     click.echo(f"==========================================\n")
 
 
+@main.command("visual")
+@click.option("--host", default="0.0.0.0", help="HTTP server bind host")
+@click.option("--port", default=8765, help="HTTP server bind port")
+@click.option("--fps", default=60, help="Visual stream capture framerate")
+@click.option("--dry-run", is_flag=True, default=False, help="Do not dispatch physical OS clicks")
+def visual(host: str, port: int, fps: int, dry_run: bool):
+    """Launch the real-time Visual HUD & AI Multimodal interface server."""
+    from .visual.server import MilliVisualServer
+    server = MilliVisualServer(host=host, port=port, fps=fps, dry_run=dry_run)
+    server.start()
+    try:
+        while True:
+            time.sleep(1.0)
+    except KeyboardInterrupt:
+        server.stop()
+        click.echo("\n[Milli-Agent] Visual server shut down cleanly.")
+
+
 if __name__ == "__main__":
     main()
+
