@@ -90,11 +90,17 @@ def monitor(duration: int, mock: bool):
 
 
 @main.command()
-@click.option("--video", default="test-video.mp4", help="Path to video file for empirical benchmark")
-def benchmark(video: str):
+@click.option("--video", default=None, help="Path to video file for empirical benchmark (defaults to synthetic stream)")
+def benchmark(video: str = None):
     """Run empirical benchmark against discrete ViT & 1-FPS baselines."""
-    click.echo(click.style(f"\n📊 [Milli-Agent] Benchmarking '{video}'...", fg="yellow", bold=True))
-    source = VideoCaptureSource(video_path=video, loop=False)
+    import os
+    from .capture.mock import MockCaptureSource
+    if video and os.path.exists(video):
+        click.echo(click.style(f"\n📊 [Milli-Agent] Benchmarking '{video}'...", fg="yellow", bold=True))
+        source = VideoCaptureSource(video_path=video, loop=False)
+    else:
+        click.echo(click.style(f"\n📊 [Milli-Agent] Benchmarking 60Hz synthetic optical manifold...", fg="yellow", bold=True))
+        source = MockCaptureSource(width=1920, height=1080)
     engine = ManifoldEngine()
 
     frames = 0

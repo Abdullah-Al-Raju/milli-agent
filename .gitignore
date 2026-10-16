@@ -9,5 +9,5 @@ models/
 *.txt
 !llms.txt
 flappy_benchmark_results.json
-
-
+*.mp4
+*.log
