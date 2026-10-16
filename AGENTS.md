@@ -100,6 +100,19 @@ req = urllib.request.Request("http://localhost:8765/api/action", data=payload, h
 urllib.request.urlopen(req)
 ```
 
+### Model Context Protocol (MCP) Client Configuration
+For Claude Desktop, Cursor, or MCP-native orchestrator integration, add Milli-Agent to your MCP server configuration:
+```json
+{
+  "mcpServers": {
+    "milli-agent": {
+      "command": "milli-agent",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
 ---
 
 ## 4. Error Handling and Recovery Protocol

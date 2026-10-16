@@ -144,6 +144,15 @@ def visual(host: str, port: int, fps: int, dry_run: bool):
         click.echo("\n[Milli-Agent] Visual server shut down cleanly.")
 
 
+@main.command("mcp")
+@click.option("--dry-run", is_flag=True, default=False, help="Do not dispatch physical OS clicks")
+def mcp(dry_run: bool):
+    """Launch Model Context Protocol (MCP) server for Claude Desktop, Cursor, and LLMs."""
+    from .mcp.server import MilliMCPServer
+    server = MilliMCPServer(dry_run=dry_run)
+    server.run_stdio()
+
+
 if __name__ == "__main__":
     main()
 

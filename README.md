@@ -273,15 +273,36 @@ Available visual endpoints (operating in transient RAM with 0 bytes saved to dis
 - **JSON Telemetry State:** `http://localhost:8765/api/state` (window resolution, active window title, effective FPS, uptime).
 - **Action Execution Endpoint:** `POST http://localhost:8765/api/action` (accepts sub-millisecond click, move, type, press_key, scroll, and evaluate commands).
 
+### Model Context Protocol (MCP) Server
+Milli-Agent includes an official MCP server enabling Claude Desktop, Cursor, and LLM orchestrators to control the OS and browser at microsecond speed without screenshot loops:
+```bash
+milli-agent mcp
+```
+Exposes tools directly via JSON-RPC 2.0:
+- `milli_click`: screen_x, screen_y, button
+- `milli_move`: x, y
+- `milli_type`: text, delay_ms
+- `milli_key`: key
+- `milli_scroll`: clicks, direction
+- `milli_get_state`: window resolution, title, platform
+- `milli_get_frame`: base64 JPEG from transient RAM (0 bytes disk persistence)
+
 ---
 
 ## 9. Running the Benchmark Suite
 
 ### Unit and Integration Tests
-Execute all 34 automated tests across Linux and Windows platform drivers, browser in-loop operations, decision bridging, native actuation, and visual servers:
+Execute all 39 automated tests across Linux and Windows platform drivers, browser in-loop operations, decision bridging, native actuation, MCP server, and visual servers:
 ```bash
 python3 -m unittest discover tests
 ```
+
+### Side-by-Side Empirical Benchmark (Milli vs. Turn-Taking Baselines)
+Runs comparative empirical evaluations measuring Time To Finish (TTF), token savings, and disk I/O reduction against Anthropic Computer Use and OSWorld architectures:
+```bash
+python3 -m milli_agent.eval.side_by_side_benchmark
+```
+Generates [`BENCHMARK_REPORT.md`](BENCHMARK_REPORT.md) and `milli_benchmark_side_by_side.json`.
 
 ### Fast Browser Benchmark
 Evaluates startup latency, DOM state extraction, in-loop typing, and reactive settling:
@@ -303,12 +324,15 @@ python3 -m milli_agent.workflows.live_unhinged_challenge
 
 ---
 
-## 10. Autonomous Agent Integration (llms.txt and AGENTS.md)
+## 10. Autonomous Agent Integration and Launch Collateral
 
 For autonomous AI agents, coding assistants, and orchestrator models (e.g. Claude Code, Codex, Cursor, AutoGPT) that discover repositories automatically:
 
+- **Model Context Protocol (MCP) Guide:** Connect Milli-Agent as an external tool provider via `milli-agent mcp`.
 - **Machine-Readable Project Summary:** See [`llms.txt`](llms.txt) for raw specifications, latency figures, and API snippets designed for model ingestion.
 - **Autonomous Agent Directive Contract:** See [`AGENTS.md`](AGENTS.md) for concrete decision criteria, error-recovery protocols, and integration contracts explaining why and how to delegate sub-tasks to Milli-Agent instead of using slow turn-taking screenshot tools.
+- **Side-by-Side Benchmark Report:** See [`BENCHMARK_REPORT.md`](BENCHMARK_REPORT.md) for detailed metrics and savings.
+- **Technical Launch Kit:** See [`LAUNCH_KIT.md`](LAUNCH_KIT.md) for Show HN, X/Twitter thread, and research publication copy.
 
 ---
 

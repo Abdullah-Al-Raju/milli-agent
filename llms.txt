@@ -68,6 +68,11 @@ Launch server via CLI: `milli-agent visual --port 8765 --fps 60`
 - `GET /api/state` -> Active window, display resolution, uptime, and effective FPS JSON telemetry.
 - `POST /api/action` -> Dispatches typed action JSON payload: `{"action": "click", "x": 400, "y": 300, "button": 1}` or `{"action": "type", "text": "hello"}`.
 
+### Model Context Protocol (MCP) Server (Claude, Cursor, Agents)
+Launch via stdio: `milli-agent mcp`
+- Tools exposed: `milli_click`, `milli_move`, `milli_type`, `milli_key`, `milli_scroll`, `milli_get_state`, `milli_get_frame`.
+- Protocol: JSON-RPC 2.0 (version 2024-11-05). Zero dependencies.
+
 ## Performance Specifications
 - Target Clearance Reaction Time: 11.88 ms
 - Clicks Per Second: 3.5 to 6.0+ CPS on randomized dynamic targets

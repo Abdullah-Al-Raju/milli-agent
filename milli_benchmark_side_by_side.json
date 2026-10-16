@@ -1,0 +1,102 @@
+{
+  "task_a": {
+    "name": "Web Search & Fact Extraction",
+    "steps": 6,
+    "baseline": {
+      "time_to_finish_seconds": 40.5,
+      "turns_taken": 6,
+      "latency_per_turn_ms": 6750.0,
+      "tokens_consumed": 11700,
+      "disk_bytes_written": 9000000,
+      "success_rate_percent": 92.0,
+      "motion_supported": false
+    },
+    "milli_agent": {
+      "time_to_finish_seconds": 0.19,
+      "turns_taken": 6,
+      "latency_per_turn_ms": 0.083,
+      "tokens_consumed": 0,
+      "disk_bytes_written": 0,
+      "success_rate_percent": 100.0,
+      "motion_supported": true
+    },
+    "speedup_factor": 213.2,
+    "token_savings": 11700,
+    "disk_savings_mb": 8.58
+  },
+  "task_b": {
+    "name": "Interactive Form Fill & Submit",
+    "steps": 8,
+    "baseline": {
+      "time_to_finish_seconds": 54.0,
+      "turns_taken": 8,
+      "latency_per_turn_ms": 6750.0,
+      "tokens_consumed": 15600,
+      "disk_bytes_written": 12000000,
+      "success_rate_percent": 92.0,
+      "motion_supported": false
+    },
+    "milli_agent": {
+      "time_to_finish_seconds": 0.22,
+      "turns_taken": 8,
+      "latency_per_turn_ms": 0.083,
+      "tokens_consumed": 0,
+      "disk_bytes_written": 0,
+      "success_rate_percent": 100.0,
+      "motion_supported": true
+    },
+    "speedup_factor": 245.5,
+    "token_savings": 15600,
+    "disk_savings_mb": 11.44
+  },
+  "task_c": {
+    "name": "OS Desktop Workflow Automation",
+    "steps": 10,
+    "baseline": {
+      "time_to_finish_seconds": 67.5,
+      "turns_taken": 10,
+      "latency_per_turn_ms": 6750.0,
+      "tokens_consumed": 19500,
+      "disk_bytes_written": 15000000,
+      "success_rate_percent": 92.0,
+      "motion_supported": false
+    },
+    "milli_agent": {
+      "time_to_finish_seconds": 0.12,
+      "turns_taken": 10,
+      "latency_per_turn_ms": 0.083,
+      "tokens_consumed": 0,
+      "disk_bytes_written": 0,
+      "success_rate_percent": 100.0,
+      "motion_supported": true
+    },
+    "speedup_factor": 562.5,
+    "token_savings": 19500,
+    "disk_savings_mb": 14.31
+  },
+  "task_d": {
+    "name": "20-Target Dynamic Optical Reflex",
+    "steps": 20,
+    "baseline": {
+      "time_to_finish_seconds": 135.0,
+      "turns_taken": 20,
+      "latency_per_turn_ms": 6750.0,
+      "tokens_consumed": 39000,
+      "disk_bytes_written": 30000000,
+      "success_rate_percent": 0.0,
+      "motion_supported": false
+    },
+    "milli_agent": {
+      "time_to_finish_seconds": 0.31,
+      "turns_taken": 20,
+      "latency_per_turn_ms": 0.083,
+      "tokens_consumed": 0,
+      "disk_bytes_written": 0,
+      "success_rate_percent": 100.0,
+      "motion_supported": true
+    },
+    "speedup_factor": 435.5,
+    "token_savings": 39000,
+    "disk_savings_mb": 28.61
+  }
+}
