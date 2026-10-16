@@ -324,7 +324,7 @@ python3 -m milli_agent.workflows.live_unhinged_challenge
 
 ---
 
-## 10. Autonomous Agent Integration and Launch Collateral
+## 10. Autonomous Agent Integration (llms.txt and AGENTS.md)
 
 For autonomous AI agents, coding assistants, and orchestrator models (e.g. Claude Code, Codex, Cursor, AutoGPT) that discover repositories automatically:
 
@@ -332,7 +332,6 @@ For autonomous AI agents, coding assistants, and orchestrator models (e.g. Claud
 - **Machine-Readable Project Summary:** See [`llms.txt`](llms.txt) for raw specifications, latency figures, and API snippets designed for model ingestion.
 - **Autonomous Agent Directive Contract:** See [`AGENTS.md`](AGENTS.md) for concrete decision criteria, error-recovery protocols, and integration contracts explaining why and how to delegate sub-tasks to Milli-Agent instead of using slow turn-taking screenshot tools.
 - **Side-by-Side Benchmark Report:** See [`BENCHMARK_REPORT.md`](BENCHMARK_REPORT.md) for detailed metrics and savings.
-- **Technical Launch Kit:** See [`LAUNCH_KIT.md`](LAUNCH_KIT.md) for Show HN, X/Twitter thread, and research publication copy.
 
 ---
 
