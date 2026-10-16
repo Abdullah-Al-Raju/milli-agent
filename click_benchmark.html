@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Milli 60-Second Optical Reflex Click Benchmark</title>
+<style>
+  body { margin: 0; background: #090d16; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+  #canvas-container { position: relative; border: 3px solid #6366f1; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+  canvas { background: #020617; display: block; cursor: none; }
+  #telemetry { margin-top: 15px; font-size: 15px; background: #0b0f19; color: #475569; padding: 12px 25px; border-radius: 6px; border: 1px solid #1e293b; }
+  .val { color: #64748b; font-weight: bold; }
+  .hit { color: #334155; font-weight: bold; }
+  .miss { color: #334155; font-weight: bold; }
+  .time { color: #64748b; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="canvas-container">
+  <canvas id="game" width="760" height="460"></canvas>
+</div>
+<div id="telemetry">
+  Time: <span id="timer" class="time">60.0s</span> | 
+  Hits: <span id="clicks" class="hit">0</span> | 
+  Misses: <span id="misses" class="miss">0</span> | 
+  Accuracy: <span id="accuracy" class="val">100.0%</span> | 
+  CPS: <span id="cps" class="val">0.0</span> | 
+  Avg Reaction: <span id="latency" class="val">0.0 ms</span> | 
+  Status: <span id="status" class="val">Ready</span>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const targetRadius = 24;
+let targetX = 380;
+let targetY = 230;
+let clicks = 0;
+let misses = 0;
+let started = false;
+let running = true;
+let latencies = [];
+let lastSpawnTime = performance.now();
+let startTime = performance.now();
+const duration = 60000; // 60.0s straight benchmark
+
+function resetBenchmark() {
+  clicks = 0;
+  misses = 0;
+  latencies = [];
+  started = false;
+  running = true;
+  document.getElementById("timer").innerText = "60.0s";
+  document.getElementById("clicks").innerText = "0";
+  document.getElementById("cps").innerText = "0.0";
+  document.getElementById("latency").innerText = "0.0 ms";
+  document.getElementById("status").innerText = "Ready (Waiting for 1st click)";
+  document.getElementById("status").style.color = "#38bdf8";
+  spawnTarget();
+  requestAnimationFrame(loop);
+}
+window.resetBenchmark = resetBenchmark;
+
+function spawnTarget() {
+  const pad = 60;
+  targetX = Math.floor(Math.random() * (canvas.width - 2 * pad)) + pad;
+  targetY = Math.floor(Math.random() * (canvas.height - 2 * pad)) + pad;
+  lastSpawnTime = performance.now();
+}
+
+canvas.addEventListener("mousedown", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+
+  const dist = Math.hypot(clickX - targetX, clickY - targetY);
+  const now = performance.now();
+
+  if (!started) {
+    started = true;
+    running = true;
+    startTime = now;
+    document.getElementById("status").innerText = "Running (60s Session)";
+    document.getElementById("status").style.color = "#f59e0b";
+  }
+
+  if (!running) return;
+
+  if (dist <= targetRadius + 6) {
+    clicks++;
+    const reactMs = now - lastSpawnTime;
+    latencies.push(reactMs);
+    document.getElementById("clicks").innerText = clicks;
+    const avgReact = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+    document.getElementById("latency").innerText = avgReact.toFixed(1) + " ms";
+    const total = clicks + misses;
+    const acc = total > 0 ? ((clicks / total) * 100).toFixed(1) : "100.0";
+    document.getElementById("accuracy").innerText = acc + "%";
+    document.title = `HIT: hits=${clicks} misses=${misses} acc=${acc}% dist=${dist.toFixed(1)} click=(${clickX.toFixed(0)},${clickY.toFixed(0)}) rect=(${rect.left.toFixed(0)},${rect.top.toFixed(0)}) target=(${targetX},${targetY})`;
+    spawnTarget();
+  } else {
+    misses++;
+    document.getElementById("misses").innerText = misses;
+    const total = clicks + misses;
+    const acc = total > 0 ? ((clicks / total) * 100).toFixed(1) : "100.0";
+    document.getElementById("accuracy").innerText = acc + "%";
+    document.title = `MISS: hits=${clicks} misses=${misses} acc=${acc}% dist=${dist.toFixed(1)} click=(${clickX.toFixed(0)},${clickY.toFixed(0)}) rect=(${rect.left.toFixed(0)},${rect.top.toFixed(0)}) target=(${targetX},${targetY})`;
+  }
+});
+
+function draw() {
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Background subtle grid
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvas.width; x += 50) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 50) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  // Draw high-contrast target (Neon Cyan Bullseye)
+  // Outer pulse ring
+  ctx.strokeStyle = "#38bdf8";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(targetX, targetY, targetRadius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Solid middle ring
+  ctx.fillStyle = "#0284c7";
+  ctx.beginPath();
+  ctx.arc(targetX, targetY, targetRadius * 0.65, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Bright white inner core (extreme gradient contrast for Milli Optical Eye)
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#38bdf8";
+  ctx.shadowBlur = 15;
+  ctx.beginPath();
+  ctx.arc(targetX, targetY, targetRadius * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Crosshair center lines
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(targetX - targetRadius - 8, targetY);
+  ctx.lineTo(targetX + targetRadius + 8, targetY);
+  ctx.moveTo(targetX, targetY - targetRadius - 8);
+  ctx.lineTo(targetX, targetY + targetRadius + 8);
+  ctx.stroke();
+}
+
+function loop() {
+  if (started && running) {
+    const elapsed = performance.now() - startTime;
+    const remaining = Math.max(0, (duration - elapsed) / 1000);
+    document.getElementById("timer").innerText = remaining.toFixed(1) + "s";
+
+    const totalSec = Math.max(0.1, elapsed / 1000);
+    const cps = (clicks / totalSec).toFixed(2);
+    document.getElementById("cps").innerText = cps;
+
+    if (elapsed >= duration) {
+      running = false;
+      document.getElementById("status").innerText = "Completed (60s Finished)";
+      document.getElementById("status").style.color = "#10b981";
+      draw();
+      return;
+    }
+  }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// Initial target
+spawnTarget();
+loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Milli 60Hz Breakout Physics Benchmark</title>
+<style>
+  body { margin: 0; background: #0f172a; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+  #canvas-container { position: relative; border: 3px solid #6366f1; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+  canvas { background: #020617; display: block; cursor: none; }
+  #telemetry { margin-top: 15px; font-size: 16px; background: #1e293b; padding: 12px 25px; border-radius: 6px; border: 1px solid #334155; }
+  .val { color: #38bdf8; font-weight: bold; }
+  .hit { color: #10b981; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="canvas-container">
+  <canvas id="game" width="800" height="550"></canvas>
+</div>
+<div id="telemetry">
+  Score: <span id="score" class="val">0</span> | 
+  Hits: <span id="hits" class="hit">0</span> | 
+  FPS: <span id="fps" class="val">60</span> | 
+  Ball Speed: <span id="speed" class="val">0.0 px/s</span>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// Paddle
+const paddleWidth = 110;
+const paddleHeight = 16;
+let paddleX = (canvas.width - paddleWidth) / 2;
+const paddleY = canvas.height - 35;
+
+// Ball
+const ballRadius = 8;
+let ballX = canvas.width / 2;
+let ballY = paddleY - 20;
+let ballSpeed = 5.2;
+let ballVx = 3.6;
+let ballVy = -3.8;
+
+// Bricks
+const rowCount = 5;
+const colCount = 10;
+const brickWidth = 70;
+const brickHeight = 20;
+const brickPadding = 8;
+const brickOffsetTop = 50;
+const brickOffsetLeft = (canvas.width - (colCount * (brickWidth + brickPadding) - brickPadding)) / 2;
+
+const brickColors = ["#ef4444", "#f97316", "#eab308", "#10b981", "#06b6d4"];
+let bricks = [];
+for (let c = 0; c < colCount; c++) {
+  bricks[c] = [];
+  for (let r = 0; r < rowCount; r++) {
+    bricks[c][r] = { x: 0, y: 0, status: 1, color: brickColors[r] };
+  }
+}
+
+let score = 0;
+let paddleHits = 0;
+let lastTime = performance.now();
+let fps = 60;
+
+// Mouse tracking
+window.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, mouseX - paddleWidth / 2));
+});
+
+function update() {
+  const now = performance.now();
+  fps = Math.round(1000 / (now - lastTime));
+  lastTime = now;
+  document.getElementById("fps").innerText = fps;
+  const currentSpeed = Math.sqrt(ballVx*ballVx + ballVy*ballVy) * 60;
+  document.getElementById("speed").innerText = currentSpeed.toFixed(1) + " px/s";
+
+  // Ball physics
+  ballX += ballVx;
+  ballY += ballVy;
+
+  // Left / Right wall bounce
+  if (ballX - ballRadius <= 0) {
+    ballX = ballRadius;
+    ballVx = -ballVx;
+  } else if (ballX + ballRadius >= canvas.width) {
+    ballX = canvas.width - ballRadius;
+    ballVx = -ballVx;
+  }
+
+  // Top ceiling bounce
+  if (ballY - ballRadius <= 0) {
+    ballY = ballRadius;
+    ballVy = -ballVy;
+  }
+
+  // Paddle collision
+  if (ballY + ballRadius >= paddleY && ballY - ballRadius <= paddleY + paddleHeight) {
+    if (ballX >= paddleX && ballX <= paddleX + paddleWidth && ballVy > 0) {
+      // Dynamic angle based on impact point relative to paddle center
+      const hitPoint = (ballX - (paddleX + paddleWidth / 2)) / (paddleWidth / 2);
+      const angle = hitPoint * (Math.PI / 3); // Max 60 degree deflection
+      const speed = Math.sqrt(ballVx * ballVx + ballVy * ballVy);
+      ballVx = speed * Math.sin(angle);
+      ballVy = -Math.abs(speed * Math.cos(angle));
+
+      paddleHits++;
+      document.getElementById("hits").innerText = paddleHits;
+    }
+  }
+
+  // Bottom pit bounce (reset ball for endless benchmarking)
+  if (ballY > canvas.height) {
+    ballX = canvas.width / 2;
+    ballY = paddleY - 40;
+    ballVx = (Math.random() > 0.5 ? 1 : -1) * 3.5;
+    ballVy = -4.0;
+  }
+
+  // Brick collision
+  for (let c = 0; c < colCount; c++) {
+    for (let r = 0; r < rowCount; r++) {
+      const b = bricks[c][r];
+      if (b.status === 1) {
+        if (
+          ballX > b.x &&
+          ballX < b.x + brickWidth &&
+          ballY > b.y &&
+          ballY < b.y + brickHeight
+        ) {
+          ballVy = -ballVy;
+          b.status = 0;
+          score += 10;
+          document.getElementById("score").innerText = score;
+        }
+      }
+    }
+  }
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw Bricks
+  for (let c = 0; c < colCount; c++) {
+    for (let r = 0; r < rowCount; r++) {
+      if (bricks[c][r].status === 1) {
+        const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+        const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+        bricks[c][r].x = brickX;
+        bricks[c][r].y = brickY;
+
+        ctx.fillStyle = bricks[c][r].color;
+        ctx.beginPath();
+        ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 4);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw Paddle
+  ctx.fillStyle = "#38bdf8";
+  ctx.beginPath();
+  ctx.roundRect(paddleX, paddleY, paddleWidth, paddleHeight, 8);
+  ctx.fill();
+  ctx.strokeStyle = "#0284c7";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw Ball (High Contrast White / Neon)
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#38bdf8";
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+update();
+</script>
+</body>
+</html>

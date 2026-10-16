@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Milli 60Hz Flappy Obstacle Benchmark</title>
+<style>
+  body { margin: 0; background: #1a1a24; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+  #canvas-container { position: relative; border: 3px solid #6366f1; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  canvas { background: #70c5ce; display: block; }
+  #telemetry { margin-top: 15px; font-size: 16px; background: #111; padding: 10px 25px; border-radius: 6px; border: 1px solid #333; }
+  .val { color: #10b981; font-weight: bold; }
+  .shock { color: #ef4444; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="canvas-container">
+  <canvas id="game" width="800" height="500"></canvas>
+</div>
+<div id="telemetry">
+  Score: <span id="score" class="val">0</span> | 
+  Jumps: <span id="jumps" class="val">0</span> | 
+  FPS: <span id="fps" class="val">60</span> | 
+  Milli Reaction: <span id="reaction" class="val">Active (16ms)</span>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let birdY = 250;
+let birdV = 0;
+const gravity = 0.45;
+const jumpStrength = -7.5;
+let score = 0;
+let jumpCount = 0;
+
+let pipes = [];
+let frameCount = 0;
+let lastTime = performance.now();
+let fps = 60;
+
+function spawnPipe() {
+  const gap = 140;
+  const topHeight = Math.floor(Math.random() * (220 - 60)) + 60;
+  pipes.push({
+    x: canvas.width,
+    top: topHeight,
+    bottom: canvas.height - (topHeight + gap),
+    passed: false
+  });
+}
+
+function flap() {
+  birdV = jumpStrength;
+  jumpCount++;
+  document.getElementById("jumps").innerText = jumpCount;
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    flap();
+  }
+});
+window.addEventListener("mousedown", flap);
+
+function update() {
+  const now = performance.now();
+  fps = Math.round(1000 / (now - lastTime));
+  lastTime = now;
+  document.getElementById("fps").innerText = fps;
+
+  frameCount++;
+  if (frameCount % 90 === 0) {
+    spawnPipe();
+  }
+
+  // Physics
+  birdV += gravity;
+  birdY += birdV;
+
+  // Ground / Ceiling limit
+  if (birdY > canvas.height - 25) {
+    birdY = canvas.height - 25;
+    birdV = 0;
+  }
+  if (birdY < 20) {
+    birdY = 20;
+    birdV = 0;
+  }
+
+  // Update pipes
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    pipes[i].x -= 4.2; // Continuous velocity transport
+
+    // Score
+    if (!pipes[i].passed && pipes[i].x < 150) {
+      pipes[i].passed = true;
+      score++;
+      document.getElementById("score").innerText = score;
+    }
+
+    // Remove off-screen
+    if (pipes[i].x < -60) {
+      pipes.splice(i, 1);
+    }
+  }
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.fillStyle = "#70c5ce";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Cloud decorations (static background scaffolds)
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.beginPath();
+  ctx.arc(200, 100, 35, 0, Math.PI*2);
+  ctx.arc(240, 90, 45, 0, Math.PI*2);
+  ctx.arc(280, 100, 35, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(600, 120, 30, 0, Math.PI*2);
+  ctx.arc(635, 110, 40, 0, Math.PI*2);
+  ctx.arc(670, 120, 30, 0, Math.PI*2);
+  ctx.fill();
+
+  // Draw pipes (moving obstacles)
+  ctx.fillStyle = "#2ecc71";
+  ctx.strokeStyle = "#27ae60";
+  ctx.lineWidth = 4;
+  for (const p of pipes) {
+    // Top pipe
+    ctx.fillRect(p.x, 0, 55, p.top);
+    ctx.strokeRect(p.x, 0, 55, p.top);
+    // Top pipe cap
+    ctx.fillRect(p.x - 4, p.top - 20, 63, 20);
+    ctx.strokeRect(p.x - 4, p.top - 20, 63, 20);
+
+    // Bottom pipe
+    const bY = canvas.height - p.bottom;
+    ctx.fillRect(p.x, bY, 55, p.bottom);
+    ctx.strokeRect(p.x, bY, 55, p.bottom);
+    // Bottom pipe cap
+    ctx.fillRect(p.x - 4, bY, 63, 20);
+    ctx.strokeRect(p.x - 4, bY, 63, 20);
+  }
+
+  // Ground
+  ctx.fillStyle = "#ded895";
+  ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+  ctx.fillStyle = "#73bf2e";
+  ctx.fillRect(0, canvas.height - 20, canvas.width, 5);
+
+  // Draw Milli Bird Mascot
+  ctx.save();
+  ctx.translate(150, birdY);
+  ctx.fillStyle = "#f39c12"; // Yellow bird
+  ctx.beginPath();
+  ctx.arc(0, 0, 18, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#d35400";
+  ctx.stroke();
+
+  // Eye
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(7, -5, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.arc(9, -5, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Beak
+  ctx.fillStyle = "#e74c3c";
+  ctx.beginPath();
+  ctx.moveTo(12, 0);
+  ctx.lineTo(24, 4);
+  ctx.lineTo(12, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// Start game
+spawnPipe();
+update();
+</script>
+</body>
+</html>

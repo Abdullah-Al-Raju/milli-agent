@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Milli Form Fill Benchmark</title>
+<style>
+  body { margin: 0; background: #0b0f19; color: #f3f4f6; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
+  .card { background: #111827; padding: 30px; border-radius: 12px; border: 2px solid #374151; width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+  h2 { margin-top: 0; color: #38bdf8; }
+  .field { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 6px; }
+  input, select { width: 100%; box-sizing: border-box; padding: 10px; background: #1f2937; border: 1px solid #4b5563; border-radius: 6px; color: #fff; font-size: 14px; }
+  input:focus { border-color: #38bdf8; outline: none; }
+  button { width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; }
+  button:hover { background: #1d4ed8; }
+  #result-banner { display: none; margin-top: 20px; padding: 14px; background: #064e3b; border: 1px solid #059669; border-radius: 6px; color: #34d399; font-weight: bold; text-align: center; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>Milli Automated Form</h2>
+  <div class="field">
+    <label>Full Name</label>
+    <input type="text" id="name" placeholder="John Doe">
+  </div>
+  <div class="field">
+    <label>Email Address</label>
+    <input type="text" id="email" placeholder="john@example.com">
+  </div>
+  <div class="field">
+    <label>Project Title</label>
+    <input type="text" id="project" placeholder="Milli Agent">
+  </div>
+  <button id="submit-btn" onclick="submitForm()">Submit Form</button>
+  <div id="result-banner">✓ Form Successfully Processed in Real Time!</div>
+</div>
+
+<script>
+function submitForm() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const proj = document.getElementById("project").value.trim();
+  if (name && email && proj) {
+    document.getElementById("result-banner").style.display = "block";
+    document.title = `SUCCESS: name=${name} email=${email} project=${proj}`;
+  } else {
+    alert("Please fill all fields");
+  }
+}
+</script>
+</body>
+</html>
