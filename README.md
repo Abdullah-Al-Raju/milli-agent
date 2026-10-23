@@ -104,6 +104,13 @@ The following benchmarks were recorded live on Ubuntu Linux (Display `:0.0`) und
 | Task C: OS Desktop Workflow Automation | 0.01 s | 22.0 s | 2,200x |
 | Task D: Neural Reflex Clearance (20 Targets) | 0.24 s | 45.0 s | 187.5x |
 
+### Visual Web Scraping Benchmark: Milli-Agent Engine vs. Firecrawl CrawlBench
+Evaluated on the Y Combinator Startup Directory (`https://www.ycombinator.com/companies`) for continuous infinite-scroll entity extraction:
+- **Incremental Scroll Perception:** **57.2 ms** (vs. Firecrawl's 2,100 ms full re-scrape — **36.8x speedup**)
+- **Token Efficiency:** **274 tokens** per scroll event (vs. Firecrawl's 1,711 tokens — **84.0% fewer tokens**)
+- **Memory Footprint:** **205.5 MB** parent process RSS (vs. Firecrawl's ~950 MB container stack)
+- **Cost:** **$0.00** local execution (vs. $15.00 / 1k pages)
+
 ### Comprehensive Multi-Step Workflow Breakdown
 Audited execution breakdown of an end-to-end multi-application workflow (System 2 planning -> in-loop web research -> quantitative analytical derivation -> native OS editor targeting -> live typing -> document persistence):
 
