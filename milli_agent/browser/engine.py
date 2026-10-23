@@ -85,12 +85,12 @@ class MilliBrowserEngine:
         # Connect CDP client
         self.client = FastCDPClient(host="localhost", port=self.port)
         
-        # Retry connect loop
+        # Retry connect loop (up to 3.5s for initial Chromium cold-start)
         connected = False
-        for _ in range(15):
+        for _ in range(35):
             try:
-                await asyncio.sleep(0.08)
-                await self.client.connect(timeout=0.5)
+                await asyncio.sleep(0.1)
+                await self.client.connect(timeout=0.8)
                 connected = True
                 break
             except Exception:
@@ -99,6 +99,7 @@ class MilliBrowserEngine:
         if not connected:
             self.stop()
             raise ConnectionError(f"Failed to connect to browser CDP port {self.port}")
+
 
         self._is_running = True
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
