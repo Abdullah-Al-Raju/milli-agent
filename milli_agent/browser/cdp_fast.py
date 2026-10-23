@@ -183,9 +183,11 @@ class FastCDPClient:
             for (let el of candidates) {
                 const rect = el.getBoundingClientRect();
                 if (rect.width > 4 && rect.height > 4 && rect.top < window.innerHeight && rect.bottom > 0) {
+                    let sel = el.id ? '#' + el.id : (el.className && typeof el.className === 'string' ? el.tagName.toLowerCase() + '.' + el.className.trim().split(/\\s+/)[0] : el.tagName.toLowerCase());
                     elements.push({
                         tag: el.tagName.toLowerCase(),
                         id: el.id || '',
+                        selector: sel,
                         text: (el.innerText || el.value || el.placeholder || el.getAttribute('aria-label') || '').trim().slice(0, 60),
                         x: Math.round(rect.left + rect.width / 2),
                         y: Math.round(rect.top + rect.height / 2),
