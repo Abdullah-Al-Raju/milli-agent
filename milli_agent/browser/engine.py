@@ -64,7 +64,12 @@ class MilliBrowserEngine:
             "--disable-sync",
             "--disable-background-networking",
             "--disable-default-apps",
-            "--mute-audio"
+            "--mute-audio",
+            "--renderer-process-limit=1",
+            "--disable-site-isolation-trials",
+            "--js-flags=--max-old-space-size=128",
+            "--disable-dev-shm-usage",
+            "--disable-features=Translate,BackForwardCache,MediaRouter,OptimizationHints"
         ]
 
         if self.headless:
@@ -109,10 +114,10 @@ class MilliBrowserEngine:
     def _find_browser_binary(self) -> Optional[str]:
         """Locates installed Chromium-based browser."""
         candidates = [
-            "/usr/bin/brave-browser",
             "/usr/bin/chromium",
             "/usr/bin/chromium-browser",
-            "/usr/bin/google-chrome"
+            "/usr/bin/google-chrome",
+            "/usr/bin/brave-browser"
         ]
         for c in candidates:
             if os.path.exists(c):

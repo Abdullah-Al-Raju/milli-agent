@@ -11,3 +11,4 @@ models/
 flappy_benchmark_results.json
 *.mp4
 *.log
+*.egg-info/
