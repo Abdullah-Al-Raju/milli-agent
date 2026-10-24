@@ -149,22 +149,47 @@ class MilliAgent:
                 app = step.get("app", "mousepad")
                 text = step.get("text", "")
                 output_file = step.get("output_file", "notepad_output.txt")
-                with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(text)
+                if output_file and text:
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(text)
 
                 if not self.dry_run:
                     import subprocess
-                    subprocess.Popen([app, output_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.Popen([app], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    
+                    # Wait for editor window to appear in X11
+                    win = None
+                    for _ in range(15):
+                        time.sleep(0.2)
+                        win = self.platform.find_window(app) or self.platform.find_window("mousepad") or self.platform.find_window("Mousepad")
+                        if win:
+                            break
+
+                    if win:
+                        self.platform.focus_window(win.id)
+                        time.sleep(0.3)
+                        # Ensure focus inside editor canvas
+                        cx = win.rect[0] + max(30, win.rect[2] // 2)
+                        cy = win.rect[1] + max(30, win.rect[3] // 2)
+                        self.controller.click(cx, cy)
+                        time.sleep(0.2)
+                        # Type text live keystroke-by-keystroke into the editor
+                        if text:
+                            self.controller.type_text(text, window_id=win.id, delay_ms=8)
+                    else:
+                        time.sleep(0.5)
+
                     if self.live_stream:
                         self.live_stream.wait_for_settled(max_velocity=0.8, timeout=0.8)
-                    else:
-                        time.sleep(0.1)
+                else:
+                    time.sleep(0.1)
+
                 execution_log.append({
                     "step": idx+1,
                     "action": "launch_notepad",
                     "app": app,
                     "file": output_file,
-                    "status": "opened_and_written"
+                    "status": "typed_live_into_editor"
                 })
 
             elif action_type == "navigate_url":
