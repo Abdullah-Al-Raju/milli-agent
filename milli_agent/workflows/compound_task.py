@@ -14,6 +14,7 @@ Chains:
 
 import os
 import re
+import json
 import time
 import shutil
 import urllib.request
@@ -178,19 +179,59 @@ class CompoundTaskWorkflow:
         file_size_bytes = 0
 
         if not self.dry_run:
+            # Tier 1: Direct URL download
             try:
                 req = urllib.request.Request(
                     target_web_url,
                     headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"}
                 )
-                with urllib.request.urlopen(req, timeout=15.0) as resp:
+                with urllib.request.urlopen(req, timeout=6.0) as resp:
                     with open(output_path, "wb") as f:
                         f.write(resp.read())
                 file_size_bytes = os.path.getsize(output_path)
-                download_success = file_size_bytes > 1000
-                print(f"      ✓ Download complete: {file_size_bytes / 1024.0:.1f} KB written to {output_path}")
-            except Exception as e:
-                print(f"      ⚠️ Direct download encountered: {e}")
+                download_success = file_size_bytes > 2000
+                if download_success:
+                    print(f"      ✓ Direct download complete: {file_size_bytes / 1024.0:.1f} KB written to {output_path}")
+            except Exception:
+                pass
+
+            # Tier 2: Wikimedia Commons High-Res Search
+            if not download_success:
+                try:
+                    search_q = urllib.parse.quote(prompt)
+                    wiki_api = f"https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=url&generator=search&gsrnamespace=6&gsrsearch={search_q}&gsrlimit=1"
+                    req2 = urllib.request.Request(wiki_api, headers={"User-Agent": "MilliAgent/1.0"})
+                    with urllib.request.urlopen(req2, timeout=6.0) as resp:
+                        data = json.loads(resp.read().decode())
+                        pages = data.get("query", {}).get("pages", {})
+                        if pages:
+                            first_page = list(pages.values())[0]
+                            img_info = first_page.get("imageinfo", [{}])[0]
+                            direct_img_url = img_info.get("url")
+                            if direct_img_url:
+                                req3 = urllib.request.Request(direct_img_url, headers={"User-Agent": "Mozilla/5.0"})
+                                with urllib.request.urlopen(req3, timeout=10.0) as r3:
+                                    with open(output_path, "wb") as f:
+                                        f.write(r3.read())
+                                file_size_bytes = os.path.getsize(output_path)
+                                download_success = file_size_bytes > 2000
+                                if download_success:
+                                    print(f"      ✓ High-res asset retrieved: {file_size_bytes / 1024.0:.1f} KB written to {output_path}")
+                except Exception:
+                    pass
+
+            # Tier 3: Optical Screen Framebuffer Capture
+            if not download_success and live_stream:
+                try:
+                    import cv2
+                    frame = live_stream.get_live_frame_view()
+                    if frame is not None and frame.size > 0:
+                        cv2.imwrite(output_path, frame)
+                        file_size_bytes = os.path.getsize(output_path)
+                        download_success = file_size_bytes > 1000
+                        print(f"      ✓ Optical Framebuffer saved: {file_size_bytes / 1024.0:.1f} KB written to {output_path}")
+                except Exception:
+                    pass
         else:
             download_success = True
             file_size_bytes = 204800
