@@ -8,9 +8,9 @@ version = "0.1.0"
 description = "Autonomous OS-level agent powered by the Continuous 4D Spatiotemporal Manifold Engine. Continuous 60Hz perception, sub-10ms non-autoregressive decisions, universal model adapters."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = { text = "Milli Dual License (Free for Personal/Academic; Commercial License Required)" }
 authors = [
-    { name = "Milli Team" }
+    { name = "Abdullah Al Raju", email = "analystx.raju@gmail.com" }
 ]
 dependencies = [
     "numpy>=1.20.0",

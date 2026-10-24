@@ -1,5 +1,11 @@
 # Milli-Agent: Real-Time Autonomous Computer-Use Engine
 
+[![License](https://img.shields.io/badge/License-Milli_Dual_License_(Research_Free_%7C_Commercial_Paid)-blue.svg)](LICENSE)
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
+[![MCP Ready](https://img.shields.io/badge/MCP-Compatible-purple.svg)](llms.txt)
+[![Tests](https://img.shields.io/badge/Tests-39%2F39_Passed-success.svg)](tests/)
+[![Reflex Latency](https://img.shields.io/badge/Step_Reflex-36.99_ms-orange.svg)](#5-audited-performance-benchmarks)
+
 A high-frequency autonomous agent architecture engineered for sub-second desktop and browser execution. By replacing conventional turn-taking screenshot loops with continuous 60Hz visual perception in RAM, sub-millisecond non-autoregressive decision classification, and in-loop execution protocols, Milli-Agent operates at physical hardware and display refresh limits.
 
 ---
@@ -363,11 +369,14 @@ For autonomous AI agents, coding assistants, and orchestrator models (e.g. Claud
 
 ---
 
-## 11. Licensing and Terms of Use
+## 11. Licensing and Commercial Rights
 
-- **Personal, Academic, and Evaluation Use:** Milli-Agent is free to use, modify, and study for individual developers, students, researchers, and personal projects.
-- **Commercial, Industrial, and Enterprise Use:** Deployment of Milli-Agent or derivative works within commercial products, enterprise process automation, revenue-generating SaaS platforms, or proprietary systems requires written commercial licensing permission.
-  - Commercial licensing inquiries: Refer to Contact Information in Section 12.
+Milli-Agent is published under the **Milli Source-Available Dual License (Commercial & Research)**. See the full legal agreement in [`LICENSE`](LICENSE).
+
+- **Research, Academic, and Personal Use (Free):** Perpetual, royalty-free license for personal experimentation, academic research, public benchmark reproduction, university coursework, and non-monetized evaluation.
+- **Commercial and Enterprise Use (Commercial License Required):** Any deployment of Milli-Agent within commercial platforms, agent orchestration SaaS, enterprise process automation, or revenue-generating products requires an active Commercial License Agreement executed with the author.
+- **Commercial Inquiries & Enterprise Appliances:** For licensing terms, enterprise appliance deployment, or acquisition discussions, contact:
+  - **Abdullah Al Raju** — `analystx.raju@gmail.com`
 
 ---
 
