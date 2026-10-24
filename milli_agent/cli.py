@@ -1,7 +1,4 @@
-"""
-Milli-Agent CLI: High-Performance, Beginner-Friendly Terminal Interface.
-"""
-
+import os
 import sys
 import time
 import click
@@ -12,21 +9,34 @@ from .capture.video import VideoCaptureSource
 from .engine.manifold import ManifoldEngine
 
 
-@click.group()
+class QuickRunGroup(click.Group):
+    """Allows running goals directly (e.g. milli-agent 'open youtube, search mr beast') without typing 'run'."""
+    def parse_args(self, ctx, args):
+        if args and args[0] not in self.commands and not args[0].startswith("-"):
+            args = ["run"] + args
+        return super().parse_args(ctx, args)
+
+
+@click.group(cls=QuickRunGroup)
 def main():
     """Milli-Agent: Autonomous OS-Level Computer-Use Agent (Continuous 4D Manifold)."""
     pass
 
 
+is_headless = not bool(os.environ.get("DISPLAY"))
+
+
 @main.command()
 @click.argument("goal", default="Open canva and draw a Milli mascot cat")
 @click.option("--model", default="builtin", help="Model backend: builtin, ollama:qwen2.5-vl, openai:gpt-4o")
-@click.option("--mock/--live", default=True, help="Use simulated browser or live X11 desktop screen")
+@click.option("--mock/--live", default=is_headless, help="Use simulated browser or live X11 desktop screen")
 @click.option("--dry-run", is_flag=True, default=False, help="Log actions without moving OS mouse")
 @click.option("--output-img", default=None, help="Save final canvas view to an image file")
 def run(goal: str, model: str, mock: bool, dry_run: bool, output_img: str):
     """Execute any high-level autonomous goal."""
-    click.echo(click.style("\n🚀 Initializing Milli-Agent...", fg="cyan", bold=True))
+    click.echo(click.style("\n🚀 [Milli-Agent] Autonomous OS Execution Active", fg="cyan", bold=True))
+    click.echo(f"  • Screen Mode: {'SIMULATION (Mock)' if mock else 'REAL PHYSICAL DESKTOP (Live X11)'}")
+    click.echo(f"  • Target Display: {os.environ.get('DISPLAY', ':0.0')}")
     source = MockCanvaDesktopSource() if mock else X11CaptureSource()
     agent = MilliAgent(capture_source=source, model=model, dry_run=dry_run)
     try:

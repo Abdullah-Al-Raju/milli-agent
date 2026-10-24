@@ -9,6 +9,7 @@ The agent uses LiveManifoldStream as a continuous physical eye:
 - Dynamic model planning with zero hardcoded task scripts.
 """
 
+import os
 import time
 from typing import Dict, Any, List, Optional
 
@@ -41,7 +42,15 @@ class MilliAgent:
         dry_run: bool = False,
         use_live_stream: bool = True
     ):
-        self.capture = capture_source or MockCanvaDesktopSource()
+        if capture_source is not None:
+            self.capture = capture_source
+        elif "DISPLAY" in os.environ and os.environ["DISPLAY"]:
+            try:
+                self.capture = X11CaptureSource()
+            except Exception:
+                self.capture = MockCanvaDesktopSource()
+        else:
+            self.capture = MockCanvaDesktopSource()
         self.engine = ManifoldEngine()
         self.router = FastDecisionRouter()
         self.adapter = ModelAdapter(model_spec=model)
@@ -101,14 +110,18 @@ class MilliAgent:
 
             if action_type == "launch_app":
                 app = step.get("app", "brave-browser")
+                url_param = step.get("url")
                 if not self.dry_run:
                     import subprocess
-                    subprocess.Popen([app], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    cmd = [app]
+                    if url_param:
+                        cmd.append(url_param)
+                    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                     if self.live_stream:
-                        self.live_stream.wait_for_settled(max_velocity=0.8, timeout=0.8)
+                        self.live_stream.wait_for_settled(max_velocity=0.8, timeout=1.5)
                     else:
-                        time.sleep(0.1)
-                execution_log.append({"step": idx+1, "action": "launch_app", "app": app, "status": "launched"})
+                        time.sleep(0.5)
+                execution_log.append({"step": idx+1, "action": "launch_app", "app": app, "url": url_param, "status": "launched"})
 
             elif action_type == "launch_notepad":
                 app = step.get("app", "mousepad")
