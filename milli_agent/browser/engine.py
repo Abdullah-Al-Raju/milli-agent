@@ -13,6 +13,8 @@ Features:
 import os
 import sys
 import time
+import shutil
+import tempfile
 import asyncio
 import subprocess
 from typing import Dict, Any, List, Optional, Tuple, Union
@@ -30,12 +32,12 @@ class MilliBrowserEngine:
         self,
         headless: bool = True,
         port: int = 9222,
-        user_data_dir: str = "/tmp/milli_browser_profile",
+        user_data_dir: Optional[str] = None,
         window_size: Tuple[int, int] = (1280, 720)
     ):
         self.headless = headless
         self.port = port
-        self.user_data_dir = user_data_dir
+        self.user_data_dir = user_data_dir or os.path.join(tempfile.gettempdir(), "milli_browser_profile")
         self.window_size = window_size
         self.proc: Optional[subprocess.Popen] = None
         self.client: Optional[FastCDPClient] = None
@@ -113,14 +115,49 @@ class MilliBrowserEngine:
         }
 
     def _find_browser_binary(self) -> Optional[str]:
-        """Locates installed Chromium-based browser."""
-        candidates = [
+        """Locates installed Chromium-based browser across Windows, macOS, and Linux."""
+        # 1. Search PATH first
+        for name in ["google-chrome", "chrome", "chromium", "chromium-browser", "brave", "brave-browser", "msedge"]:
+            found = shutil.which(name)
+            if found:
+                return found
+
+        # 2. Windows specific installation locations
+        if sys.platform == "win32":
+            win_candidates = [
+                os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+                os.path.expandvars(r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
+                os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
+                os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+                os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+                os.path.expandvars(r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+                os.path.expandvars(r"%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+            ]
+            for c in win_candidates:
+                if os.path.exists(c):
+                    return c
+
+        # 3. macOS specific installation locations
+        if sys.platform == "darwin":
+            mac_candidates = [
+                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                "/Applications/Chromium.app/Contents/MacOS/Chromium",
+                "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+                "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+            ]
+            for c in mac_candidates:
+                if os.path.exists(c):
+                    return c
+
+        # 4. Linux specific installation locations
+        linux_candidates = [
             "/usr/bin/chromium",
             "/usr/bin/chromium-browser",
             "/usr/bin/google-chrome",
-            "/usr/bin/brave-browser"
+            "/usr/bin/brave-browser",
+            "/snap/bin/chromium"
         ]
-        for c in candidates:
+        for c in linux_candidates:
             if os.path.exists(c):
                 return c
         return None
